@@ -1,6 +1,6 @@
 import { NOTIFICATION_CHANNEL_UPDATE } from "./constants";
 import { ChannelUpdateEvent, EventNotification } from "./types";
-import { channelToCategory } from "./store";
+import { channelToCategory, channelToRewards } from "./store";
 // cf. https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/
 export const handleNotification = (notification: EventNotification) => {
   const notificationType = notification.subscription.type;
@@ -16,8 +16,6 @@ export const handleNotification = (notification: EventNotification) => {
 
 const handleChannelUpdate = (notification: EventNotification) => {
   const event = notification.event as ChannelUpdateEvent;
-  const broadcasterId = event.broadcaster_user_id;
-  const categoryId = event.category_id;
 
   if (didChannelCategoryChange(notification)) {
     handleChannelCategoryUpdate(notification);
@@ -27,12 +25,14 @@ const handleChannelUpdate = (notification: EventNotification) => {
 const handleChannelCategoryUpdate = (notification: EventNotification) => {
   const event = notification.event as ChannelUpdateEvent;
 
+  console.log(`Channel ${event.broadcaster_user_id} category updated to ${event.category_id} - ${event.category_name}`);
+
   channelToCategory.set(event.broadcaster_user_id, {
     categoryId: event.category_id,
     categoryName: event.category_name,
   });
 
-  console.log(`Channel ${event.broadcaster_user_id} category updated to ${event.category_id} - ${event.category_name}`);
+  updateChannelRewards(event.broadcaster_user_id, event.category_id);
 };
 
 const didChannelCategoryChange = (notification: EventNotification) => {
@@ -47,4 +47,24 @@ const didChannelCategoryChange = (notification: EventNotification) => {
 
   // First time setting the category, consider it changed
   return true;
+};
+
+const updateChannelRewards = (broadcasterId: string, categoryId: string) => {
+  if (!channelToRewards.has(broadcasterId)) return;
+
+  const rewards = channelToRewards.get(broadcasterId);
+  if (!rewards) return;
+
+  const rewardsToEnable = rewards
+    .filter((reward) => reward.categories.includes("*") || reward.categories.includes(categoryId))
+    .map((reward) => reward.id);
+
+  const rewardsToDisable = rewards
+    .filter((reward) => !reward.categories.includes("*") && !reward.categories.includes(categoryId))
+    .map((reward) => reward.id);
+
+  console.log({
+    rewardsToEnable,
+    rewardsToDisable,
+  });
 };

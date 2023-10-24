@@ -36,3 +36,8 @@ export interface StreamCategory {
   categoryId: string;
   categoryName: string;
 }
+
+export interface RewardToCategory {
+  id: string;
+  categories: string[];
+}
