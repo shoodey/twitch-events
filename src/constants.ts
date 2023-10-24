@@ -8,3 +8,6 @@ export const MESSAGE_TYPE = "Twitch-Eventsub-Message-Type".toLowerCase();
 export const MESSAGE_TYPE_VERIFICATION = "webhook_callback_verification";
 export const MESSAGE_TYPE_NOTIFICATION = "notification";
 export const MESSAGE_TYPE_REVOCATION = "revocation";
+
+// Notification types
+export const NOTIFICATION_CHANNEL_UPDATE = "channel.update";
