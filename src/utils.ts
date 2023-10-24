@@ -23,3 +23,26 @@ export const verifyMessage = (req: Request) => {
 
   return crypto.timingSafeEqual(Buffer.from(hmac), Buffer.from(signature));
 };
+
+export const getAccessToken = async () => {
+  const url = "https://id.twitch.tv/oauth2/token";
+  const headers = {
+    "Content-Type": "application/json",
+  };
+  const data = {
+    client_id: process.env.TWITCH_CLIENT_ID,
+    client_secret: process.env.TWITCH_CLIENT_SECRET,
+    grant_type: "client_credentials",
+  };
+
+  console.log("Fetching access token...");
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(data),
+  });
+
+  const json = await response.json();
+  return json.access_token;
+};
