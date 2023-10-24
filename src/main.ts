@@ -129,6 +129,53 @@ app.post("/webhook/callback", async (req, res) => {
   res.sendStatus(403);
 });
 
+app.get("/rewards/:broadcaster_id", async (req, res) => {
+  const broadcasterId = req.params.broadcaster_id;
+  const url = `${helix.baseUrl}/channel_points/custom_rewards?broadcaster_id=${broadcasterId}`;
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      ...helix.headers,
+      Authorization: `Bearer ${process.env.TWITCH_USER_ACCESS_TOKEN}`,
+    },
+  });
+
+  res.status(200).json(await response.json());
+});
+
+app.patch("/rewards/:broadcaster_id/update/:reward_id/:is_enabled", async (req, res) => {
+  const broadcasterId = req.params.broadcaster_id;
+  const rewardId = req.params.reward_id;
+  const is_enabled = req.params.is_enabled;
+
+  if (is_enabled !== "enable" && is_enabled !== "disable") {
+    res.status(400).json({ error: "Invalid is_enabled value. Must be either 'enable' or 'disable'" });
+    return;
+  }
+
+  console.log(`Updating reward ${rewardId} for channel ${broadcasterId} to ${is_enabled}`);
+
+  res.status(200).end();
+
+  // TODO: Disabled as my channel doesn't have the affiliate/partner status
+  // const url = `${helix.baseUrl}/channel_points/custom_rewards?broadcaster_id=${broadcasterId}&id=${rewardId}`;
+  // const data = {
+  //   is_enabled: is_enabled === "enable",
+  // };
+
+  // const response = await fetch(url, {
+  //   method: "PATCH",
+  //   headers: {
+  //     ...helix.headers,
+  //     Authorization: `Bearer ${process.env.TWITCH_USER_ACCESS_TOKEN}`,
+  //   },
+  //   body: JSON.stringify(data),
+  // });
+
+  // res.status(200).json(await response.json());
+});
+
 // Start server
 app.listen(process.env.APP_PORT, async () => {
   accessToken = await getAccessToken();

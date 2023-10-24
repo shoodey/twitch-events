@@ -57,14 +57,28 @@ const updateChannelRewards = (broadcasterId: string, categoryId: string) => {
 
   const rewardsToEnable = rewards
     .filter((reward) => reward.categories.includes("*") || reward.categories.includes(categoryId))
-    .map((reward) => reward.id);
+    .map((reward) => {
+      toggleReward(broadcasterId, reward.id, "enable");
+      return reward.id;
+    });
 
   const rewardsToDisable = rewards
     .filter((reward) => !reward.categories.includes("*") && !reward.categories.includes(categoryId))
-    .map((reward) => reward.id);
+    .map((reward) => {
+      toggleReward(broadcasterId, reward.id, "disable");
+      return reward.id;
+    });
 
   console.log({
     rewardsToEnable,
     rewardsToDisable,
+  });
+};
+
+const toggleReward = (broadcasterId: string, rewardId: string, state: string) => {
+  const url = `http://localhost:3333/rewards/${broadcasterId}/update/${rewardId}/${state}`;
+
+  fetch(url, {
+    method: "PATCH",
   });
 };
