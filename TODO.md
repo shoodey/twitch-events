@@ -1,0 +1,3 @@
+## Misc
+
+- [ ] Validate environment variables
